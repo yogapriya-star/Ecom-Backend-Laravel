@@ -11,13 +11,16 @@ class AuthRegisterResource extends JsonResource
     {
         return [
             'status' => true,
-            'message' => 'User registered successfully',
+            'message' => 'Registered successfully',
+            'token'   => $this['token'],
+            'token_type' => 'Bearer',
+
             'data' => [
-                'id' => $this->id,
-                'full_name' => $this->full_name,
-                'email' => $this->email,
-                'phone' => $this->phone,
-                'role' => $this->role,
+                'id' => $this['user']->id,
+                'full_name' => $this['user']->full_name,
+                'email' => $this['user']->email,
+                'phone' => $this['user']->phone,
+                'role' => $this['user']->role,
             ]
         ];
     }
