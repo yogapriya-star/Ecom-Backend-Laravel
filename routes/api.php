@@ -9,9 +9,9 @@ use Illuminate\Auth\Events\Verified;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Forgot & Reset Password
-Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
-Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+// Forgot/Reset password
+Route::post('/password/forgot', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 
 // Email verification link
 Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])
@@ -22,3 +22,5 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::post('/email/resend', [AuthController::class, 'resendVerification']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+

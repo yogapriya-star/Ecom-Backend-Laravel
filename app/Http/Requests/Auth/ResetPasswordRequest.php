@@ -14,9 +14,17 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'token' => 'required|string',
             'email' => 'required|email|exists:users,email',
-            'token' => 'required',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|string|min:6|confirmed',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.exists' => 'Email not found in system',
+            'password.confirmed' => 'Password confirmation does not match',
         ];
     }
 }

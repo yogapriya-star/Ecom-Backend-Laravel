@@ -2,31 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;;
-use Carbon\Carbon;
-use App\Mail\VerifyEmail;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
+
+use Tymon\JWTAuth\Exceptions\JWTException;
+
+use App\Models\User;
+use App\Mail\VerifyEmail;
+use Carbon\Carbon;
+
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 
+use App\Http\Resources\AuthResetPasswordResource;
 use App\Http\Resources\AuthRegisterResource;
 use App\Http\Resources\AuthLoginResource;
 use App\Http\Resources\AuthForgotPasswordResource;
+use App\Http\Resources\AuthResendVerificationResource;
+
 
 class AuthController extends Controller
 {
     /**
      * Register
-     */
+    */
     public function register(RegisterRequest $request)
     {
         $user = User::create([
@@ -38,7 +46,7 @@ class AuthController extends Controller
             'role' => 'customer',
         ]);
 
-           // Generate JWT token
+        // Generate JWT token
         $token = JWTAuth::fromUser($user);
 
         // Generate signed verification link (valid for 60 minutes)
@@ -51,15 +59,18 @@ class AuthController extends Controller
         // Send verification email
         Mail::to($user->email)->send(new VerifyEmail($user, $verifyUrl));
 
-        return new AuthRegisterResource($user);
+        return new AuthRegisterResource([
+            'user'  => $user,
+            'token' => $token
+        ]);
     }
 
     /**
      * Login
-     */
-    public function login(Request $request)
+    */
+    public function login(LoginRequest $request)
     {
-         $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         // Check credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -102,7 +113,7 @@ class AuthController extends Controller
 
     /**
      * Verify Email
-     */
+    */
     public function verifyEmail(Request $request, $id)
     {
         if (! $request->hasValidSignature()) {
@@ -155,28 +166,18 @@ class AuthController extends Controller
         }
 
         $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
+            'verify.email',
             Carbon::now()->addMinutes(60),
             ['id' => $user->id, 'hash' => sha1($user->email)]
         );
 
         Mail::to($user->email)->send(new VerifyEmail($user, $verificationUrl));
 
-        return response()->json([
+        return new AuthResendVerificationResource((object)[
             'status' => true,
             'message' => 'Verification email resent successfully.',
             'verification_url' => $verificationUrl
-        ], 200);
-    }
-
-    /**
-     * Forgot Password
-     */
-    public function forgotPassword(ForgotPasswordRequest $request)
-    {
-        // Optional: Trigger email with reset link
-        return new AuthForgotPasswordResource([
-            'email' => $request->email
         ]);
     }
+
 }

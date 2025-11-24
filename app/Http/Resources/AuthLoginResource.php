@@ -15,11 +15,12 @@ class AuthLoginResource extends JsonResource
             'token'   => $this['token'],
             'token_type' => 'Bearer',
 
-            'user' => [
-                'id'    => $this['user']->id,
-                'name'  => $this['user']->name,
+            'data' => [
+                'id' => $this['user']->id,
+                'full_name' => $this['user']->full_name,
                 'email' => $this['user']->email,
-                'role'  => $this['user']->role,
+                'phone' => $this['user']->phone,
+                'role' => $this['user']->role,
             ]
         ];
     }

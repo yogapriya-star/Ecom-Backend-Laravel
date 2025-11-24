@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Notifications\ResetPasswordMail;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -67,4 +68,9 @@ class User extends Authenticatable implements JWTSubject
         // Addresses shared with this user
         return $this->belongsToMany(Address::class, 'address_user', 'user_id', 'address_id')->withTimestamps();
     }
+
+    public function sendPasswordResetNotification($token)
+{
+    $this->notify(new ResetPasswordMail($token));
+}
 }
