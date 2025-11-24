@@ -18,7 +18,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone', 20)->unique()->nullable();
             $table->string('password');
-            $table->string('confirm_password');
             $table->enum('role',['super_admin','manager','employee','customer']) ->comment('Role managed manually by backend developer');
             $table->boolean('is_active')->default(1);
             $table->timestamp('last_login_at')->nullable(); 
