@@ -180,4 +180,23 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Logout 
+    */
+    public function logout(Request $request)
+    {
+        try {
+            JWTAuth::invalidate(JWTAuth::parseToken());
+            return response()->json([
+                'status' => true,
+                'message' => 'Logged out successfully.'
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Could not log out.',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
