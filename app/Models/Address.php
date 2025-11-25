@@ -13,18 +13,15 @@ class Address extends Model
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'phone', 'address_line1', 'address_line2',
-        'city', 'state', 'zipcode', 'order_notes', 'created_by'
+        'city', 'state', 'zipcode', 'order_notes', 'created_by','is_active'
     ];
 
-    // Owner of the address
-    public function owner()
+    /**
+     * Each address belongs to one user.
+     */
+    public function user()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class);
     }
 
-    // Users associated with this address (pivot)
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'address_user', 'address_id', 'user_id')->withTimestamps();
-    }
 }
