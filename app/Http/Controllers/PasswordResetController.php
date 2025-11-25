@@ -20,7 +20,7 @@ class PasswordResetController extends Controller
         $status = Password::sendResetLink($request->only('email'));
 
         // Pass array to Resource
-        return new AuthForgotPasswordResource([
+        return new AuthForgotPasswordResource((object)[
             'email'  => $request->email,
             'status' => $status
         ]);
@@ -40,7 +40,7 @@ class PasswordResetController extends Controller
             }
         );
 
-        return new AuthResetPasswordResource([
+        return new AuthResetPasswordResource((object)[
             'status' => $status
         ]);
     }

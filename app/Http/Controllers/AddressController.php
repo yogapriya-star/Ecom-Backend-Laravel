@@ -35,12 +35,24 @@ class AddressController extends Controller
     /**
      * Update address (only if created_by = auth user)
     */
-    public function update(UpdateAddressRequest $request, $id)
+   public function update(UpdateAddressRequest $request, $id)
     {
-        $address = Address::where('id', $id)->where('created_by', auth()->id())->firstOrFail();
+        $address = Address::where([
+            'id' => $id,
+            'created_by' => auth()->id(),
+        ])->first();
+
+        if (!$address) {
+            return response()->json([
+                'message' => 'This address does not belong to you or does not exist.'
+            ], 403);
+        }
+
         $address->update($request->validated());
+
         return new AddressResource($address);
-    }
+}
+
 
     /**
      * Delete address
