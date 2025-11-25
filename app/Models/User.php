@@ -57,20 +57,14 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTIdentifier() { return $this->getKey(); }
     public function getJWTCustomClaims() { return []; }
 
-        public function addresses()
+    public function addresses()
     {
         // Addresses created by this user
         return $this->hasMany(Address::class, 'created_by');
     }
 
-    public function sharedAddresses()
-    {
-        // Addresses shared with this user
-        return $this->belongsToMany(Address::class, 'address_user', 'user_id', 'address_id')->withTimestamps();
-    }
-
     public function sendPasswordResetNotification($token)
-{
-    $this->notify(new ResetPasswordMail($token));
-}
+    {
+        $this->notify(new ResetPasswordMail($token));
+    }
 }

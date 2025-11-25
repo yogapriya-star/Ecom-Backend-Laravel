@@ -27,15 +27,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-
-        // Pivot table for shared addresses
-        Schema::create('address_user', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('address_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-            $table->unique(['user_id', 'address_id']);
-        });
     }
 
     /**
@@ -43,7 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('address_user');
         Schema::dropIfExists('addresses');
     }
 };
