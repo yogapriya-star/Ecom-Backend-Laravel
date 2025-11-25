@@ -20,15 +20,13 @@ Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('
 // Protected routes (Logout, Email resend verification link, Address )
 Route::middleware(['jwt.auth'])->group(function () {
     Route::post('/email/resend', [AuthController::class, 'resendVerification']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
+Route::middleware('role:customer')->group(function () {
     Route::get('/addresses', [AddressController::class, 'index']);
     Route::post('/addresses', [AddressController::class, 'store']);
     Route::put('/addresses/{id}', [AddressController::class, 'update']);
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
     Route::post('/addresses/{id}/set-active', [AddressController::class, 'setActiveAddress']);
-
-
-    Route::post('/logout', [AuthController::class, 'logout']);
 });
-
-
