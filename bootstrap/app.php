@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,15 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global middleware (old $middleware)
-        $middleware->append([
-            // \App\Http\Middleware\TrustProxies::class,
-            // etc...
-        ]);
 
-        // Middleware groups (old $middlewareGroups)
+        $middleware->append([]);
+
         $middleware->group('web', [
-            \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
@@ -32,7 +28,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
-        // Route middleware aliases (old $routeMiddleware)
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
@@ -42,4 +37,3 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
-

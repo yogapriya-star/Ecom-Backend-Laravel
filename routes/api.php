@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Auth\Events\Verified;
 
 // Public routes (Register, Login)
@@ -29,4 +30,22 @@ Route::middleware(['jwt.auth', 'role:customer'])->group(function () {
     Route::put('/addresses/{id}', [AddressController::class, 'update']);
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
     Route::post('/addresses/{id}/set-active', [AddressController::class, 'setActiveAddress']);
+});
+
+Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(function () {
+    Route::prefix('categories')->group(function () {
+
+        // Static first
+        Route::get('/', [CategoryController::class, 'index']);
+        Route::get('/tree', [CategoryController::class, 'categoryTree']);
+        Route::get('/parents', [CategoryController::class, 'parentCategories']);
+        Route::get('/second-level', [CategoryController::class, 'secondLevelCategories']);
+
+        Route::post('/', [CategoryController::class, 'store']);
+
+        // Dynamic last
+        Route::get('/{category}', [CategoryController::class, 'show']);
+        Route::put('/{category}', [CategoryController::class, 'update']);
+        Route::delete('/{category}', [CategoryController::class, 'destroy']);
+    });
 });
