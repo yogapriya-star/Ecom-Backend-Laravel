@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Auth\Events\Verified;
 
 // Public routes (Register, Login)
@@ -47,5 +48,20 @@ Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(func
         Route::get('/{category}', [CategoryController::class, 'show']);
         Route::put('/{category}', [CategoryController::class, 'update']);
         Route::delete('/{category}', [CategoryController::class, 'destroy']);
+    });
+});
+
+Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(function () {
+    Route::prefix('products')->group(function () {
+
+        // Static first
+        Route::get('/', [ProductController::class, 'index']);
+        Route::get('{product}', [ProductController::class, 'show']);
+
+        Route::post('/', [ProductController::class, 'store']);
+
+        // Dynamic last
+        Route::put('{product}', [ProductController::class, 'update']);
+        Route::delete('{product}', [ProductController::class, 'destroy']);
     });
 });
