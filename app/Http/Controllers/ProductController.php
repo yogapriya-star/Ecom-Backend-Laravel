@@ -12,12 +12,18 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    /**
+     * Get all products
+    */
     public function index()
     {
         $products = Product::with('category')->paginate(10);
         return ProductResource::collection($products);
     }
 
+    /**
+     * Get product by id
+    */
     public function show($id)
     {
         $product = Product::find($id);
@@ -32,7 +38,9 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-
+    /**
+     * Create Product
+    */
     public function store(StoreProductRequest $request)
     {
         $data = $request->validated();
@@ -45,6 +53,9 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
+    /**
+     * Update product
+    */
     public function update(UpdateProductRequest $request, Product $product)
     {
         $data = $request->validated();
@@ -57,6 +68,9 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
+    /**
+     * Delete product
+    */
     public function destroy($id)
     {
         $product = Product::find($id);
