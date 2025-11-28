@@ -6,6 +6,8 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\ProductVariantController;
 use Illuminate\Auth\Events\Verified;
 
 // Public routes (Register, Login)
@@ -55,13 +57,33 @@ Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(func
     Route::prefix('products')->group(function () {
 
         // Static first
-        Route::get('/', [ProductController::class, 'index']);
-        Route::get('{product}', [ProductController::class, 'show']);
+        Route::get('/', [ProductController::class, 'index']); // List Products
+        Route::get('{product}', [ProductController::class, 'show']); // Single Product
 
-        Route::post('/', [ProductController::class, 'store']);
+        Route::post('/', [ProductController::class, 'store']); // Create Product
 
         // Dynamic last
-        Route::put('{product}', [ProductController::class, 'update']);
-        Route::delete('{product}', [ProductController::class, 'destroy']);
+        Route::put('{product}', [ProductController::class, 'update']); // Update Product
+        Route::delete('{product}', [ProductController::class, 'destroy']); // Delete Product
+
+        //Product Images
+        Route::get('{product}/images', [ProductImageController::class, 'index']); // List Product Image
+
+        Route::post('images', [ProductImageController::class, 'store']); // Create Product Image
+
+        Route::post('{product}/images/{image}/primary', [ProductImageController::class, 'setPrimary']); // Set Primary Product Image
+        Route::post('{product}/images/reorder', [ProductImageController::class, 'reorder']); // Reorder Product Image
+
+        Route::put('images/{id}', [ProductImageController::class, 'update']); // Update Product Image
+        Route::delete('images/{id}', [ProductImageController::class, 'destroy']); // Delete Product Image
+
+        //Product Variant
+        Route::get('/{product}/variants', [ProductVariantController::class, 'index']);      // List variants
+        Route::get('/{product}/variants/{variantId}', [ProductVariantController::class, 'show']); // Single variant
+
+        Route::post('/{product}/variants', [ProductVariantController::class, 'store']);     // Create variant
+        
+        Route::put('/{product}/variants/{variant}', [ProductVariantController::class, 'update']); // Update variant
+        Route::delete('/{product}/variants/{variantId}', [ProductVariantController::class, 'destroy']); // Delete
     });
 });

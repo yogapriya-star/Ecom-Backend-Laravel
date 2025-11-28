@@ -59,7 +59,13 @@ class AddressController extends Controller
     */
     public function destroy($id)
     {
-        $address = Address::where('id', $id)->where('created_by', auth()->id())->firstOrFail();
+        $address = Address::where('id', $id)->where('created_by', auth()->id())->first();
+        if (!$address) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Address not found',
+            ], 404);
+        }
         $address->delete();
         return response()->json(['message' => 'Address deleted successfully']);
     }
