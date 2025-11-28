@@ -27,7 +27,6 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false);
             $table->enum('status', ['active','out_of_stock','hidden'])->default('active');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
