@@ -39,55 +39,56 @@ class ProductImageController extends Controller
     /**
      * Store images for variant
      */
-    public function store(StoreProductImageRequest $request)
+   public function store(StoreProductImageRequest $request)
     {
         $data = $request->validated();
-        $variant = ProductVariant::find($data['product_variant_id']);
+        $variant = ProductVariant::findOrFail($data['product_variant_id']);
 
-        if (!$variant) {
-            return response()->json(['status'=>false,'message'=>'Variant not found'], 404);
+        // Get uploaded files safely
+        $images = $request->file('images');
+
+        if (!$images) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No images uploaded'
+            ], 422);
         }
 
-        $images = $request->file('images');
+        // Ensure $images is always an array
+        $images = is_array($images) ? $images : [$images];
+
         $storedImages = [];
 
-        DB::beginTransaction();
-
-        try {
+        DB::transaction(function () use ($variant, $images, $data, &$storedImages) {
             $existingCount = $variant->images()->count();
             $hasPrimary = $variant->images()->where('is_primary', 1)->exists();
 
             foreach ($images as $index => $file) {
+                $path = $file->store(
+                    "products/{$variant->product_id}/variants/{$variant->id}",
+                    'public'
+                );
 
-                $path = $file->store("products/{$variant->product_id}/variants/{$variant->id}", 'public');
-
-                // First uploaded image becomes primary if none exists
                 $isPrimary = (!$hasPrimary && $existingCount === 0 && $index === 0);
 
                 $image = ProductImage::create([
                     'product_id'         => $variant->product_id,
                     'product_variant_id' => $variant->id,
                     'path'               => $path,
-                    'alt_text'           => $data['alt_text'],
+                    'alt_text'           => $data['alt_text'] ?? null,
                     'position'           => $existingCount + $index,
                     'is_primary'         => $isPrimary,
                 ]);
 
                 $storedImages[] = new ProductImageResource($image);
             }
+        });
 
-            DB::commit();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Images uploaded successfully',
-                'data' => $storedImages
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['status'=>false,'message'=>$e->getMessage()], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Images uploaded successfully',
+            'data' => $storedImages
+        ]);
     }
 
     /**

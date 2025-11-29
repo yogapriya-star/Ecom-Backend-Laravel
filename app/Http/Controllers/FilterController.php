@@ -65,23 +65,29 @@ class FilterController extends Controller
     */
     public function filteredProducts(Request $request)
     {
-        $filters = $request->get('filters', []);
+        $limit = $request->query('limit', 10);
+        $page  = $request->query('page', 1);
 
-        $query = Product::query()
-            ->with([
-                'images',
-                'variants',
-                'filterOptions.filter'
-            ]);
+        // Base query with relationships
+        $query = Product::with([
+            'variants.images',
+            'filterOptions.filter'
+        ]);
 
-        foreach ($filters as $filterId => $optionIds) {
-            $query->whereHas('filterOptions', function($q) use ($filterId, $optionIds) {
-                $q->where('filter_id', $filterId)
-                ->whereIn('filter_option_id', $optionIds);
-            });
-        }
+        // Paginate products
+        $paginated = $query->paginate($limit, ['*'], 'page', $page);
 
-        return ProductFilterResource::collection($query->get());
+        // Transform products and remove those with zero matching variants
+        $filteredProducts = $paginated->getCollection()->map(function ($product) use ($request) {
+            $resource = new ProductFilterResource($product, $request);
+            // Return null if variants are empty
+            return empty($resource['variants']) ? null : $resource;
+        })->filter(); // Remove nulls
+
+        // Replace paginator collection with filtered products
+        $paginated->setCollection($filteredProducts);
+
+        return response()->json($paginated);
     }
 
 }
