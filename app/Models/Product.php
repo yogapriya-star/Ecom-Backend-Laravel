@@ -33,9 +33,9 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
-    public function filters()
+    public function filterOptions() 
     {
-        return $this->belongsToMany(FilterOption::class, 'product_filter_values', 'product_id', 'filter_option_id');
+        return $this->belongsToMany(FilterOption::class, 'product_filter_values');
     }
 }
 

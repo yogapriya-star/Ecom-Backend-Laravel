@@ -8,6 +8,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\FilterController;
+use App\Http\Controllers\FilterOptionController;
+use App\Http\Controllers\ProductFilterController;
 use Illuminate\Auth\Events\Verified;
 
 // Public routes (Register, Login)
@@ -21,9 +24,12 @@ Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']
 // Email verification link
 Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verify.email');
 
+// Resend email verification
+Route::post('/email/resend', [AuthController::class, 'resendVerificationByEmail']);
+
 // Protected routes (Logout, Email resend verification link, Address )
 Route::middleware(['jwt.auth'])->group(function () {
-    Route::post('/email/resend', [AuthController::class, 'resendVerification']);
+   
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
@@ -33,9 +39,14 @@ Route::middleware(['jwt.auth', 'role:customer'])->group(function () {
     Route::put('/addresses/{id}', [AddressController::class, 'update']);
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
     Route::post('/addresses/{id}/set-active', [AddressController::class, 'setActiveAddress']);
+
+    Route::get('/filters', [FilterController::class,'index']);
+    Route::get('/filters/{filter}/options', [FilterOptionController::class,'index']);
+    Route::get('/products/filter', [FilterController::class,'filteredProducts']);
 });
 
 Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(function () {
+
     Route::prefix('categories')->group(function () {
 
         // Static first
@@ -51,9 +62,7 @@ Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(func
         Route::put('/{category}', [CategoryController::class, 'update']);
         Route::delete('/{category}', [CategoryController::class, 'destroy']);
     });
-});
 
-Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(function () {
     Route::prefix('products')->group(function () {
 
         // Static first
@@ -85,5 +94,20 @@ Route::middleware(['jwt.auth', 'role:super_admin|manager|employee'])->group(func
         
         Route::put('/{product}/variants/{variant}', [ProductVariantController::class, 'update']); // Update variant
         Route::delete('/{product}/variants/{variantId}', [ProductVariantController::class, 'destroy']); // Delete
+        
+        // Assign filter options to products
+        Route::post('/{product}/assign-filters', [ProductFilterController::class,'assign']);
     });
+
+    // Filter CRUD
+    Route::prefix('filters')->group(function () {
+        Route::post('/', [FilterController::class,'store']);
+        Route::put('{filter}', [FilterController::class,'update']);
+        Route::delete('{filter}', [FilterController::class,'destroy']);
+        Route::post('{filter}/options', [FilterOptionController::class,'store']);
+        Route::put('/options/{option}', [FilterOptionController::class,'update']);
+        Route::delete('/options/{option}', [FilterOptionController::class,'destroy']);
+    });
+
+    
 });
