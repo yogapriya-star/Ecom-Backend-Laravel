@@ -154,9 +154,20 @@ class AuthController extends Controller
     /**
      * Resend verification email
     */
-    public function resendVerification(Request $request)
+    public function resendVerificationByEmail(Request $request)
     {
-        $user = $request->user();
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
 
         if ($user->hasVerifiedEmail()) {
             return response()->json([
@@ -167,18 +178,22 @@ class AuthController extends Controller
 
         $verificationUrl = URL::temporarySignedRoute(
             'verify.email',
-            Carbon::now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
+            now()->addMinutes(60),
+            [
+                'id' => $user->id,
+                'hash' => sha1($user->email)
+            ]
         );
 
         Mail::to($user->email)->send(new VerifyEmail($user, $verificationUrl));
 
-        return new AuthResendVerificationResource((object)[
+        return response()->json([
             'status' => true,
-            'message' => 'Verification email resent successfully.',
+            'message' => 'Verification email sent successfully.',
             'verification_url' => $verificationUrl
         ]);
     }
+
 
     /**
      * Logout 
